@@ -1,12 +1,20 @@
-CSG simpleSyntax =new Cylinder(10,40).toCSG() // a one line Cylinder
-CSG myCylinder = new Cylinder(100, // Radius at the bottom
-                      		100, // Radius at the top
-                      		5, // Height
-                      		(int)30 //resolution
-                      		).toCSG()
-                      		//convert to CSG to display                    			         ).toCSG()//convert to CSG to display 
-CSG scoopInner = new Cylinder(10,10,50,(int)30).toCSG()
+int wheelRadius = 75
+int wheelHeight = 50
+
+CSG base = new Cylinder(wheelRadius - 3,wheelRadius - 3,5,(int)30).toCSG()
+CSG innerVoid = base.scalez(10)
+CSG outerWall = new Cylinder(wheelRadius,wheelRadius,50,(int)30).toCSG().difference(innerVoid)//convert to CSG to display                    			         ).toCSG()//convert to CSG to display 
+CSG scoopInner = new Cylinder(9,9,50,(int)30).toCSG()
 CSG scoopOuter = new Cylinder(12,12,50,(int)30).toCSG()
-CSG cutPlane = new Cube(40,20,60).toCSG().movey(-10)
-CSG scoopCombined = scoopOuter.difference(scoopInner).rotx(-10)
-return cutPlane//Your code here
+CSG cutPlane = new Cube(40,20,60).toCSG().movey(-10).toZMin()
+CSG scoopCombined = scoopOuter.difference(scoopInner).difference(cutPlane).rotx(-10).roty(-3).movex(wheelRadius-13)
+CSG wheel = base.union(outerWall)
+innerVoid = innerVoid.scalex(0.5).scaley(0.5)
+CSG cleanMax = new Cylinder(wheelRadius,wheelRadius,wheelHeight,(int)30).toCSG()
+
+for(int i=0; i<8; i++){
+	wheel=wheel.union(scoopCombined.rotz(i*(360/8)))
+}
+wheel=wheel.difference(innerVoid)
+wheel=wheel.intersect(cleanMax)
+return wheel
