@@ -1,7 +1,16 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine
+import com.neuronrobotics.bowlerstudio.vitamins.Vitamins
+
+import eu.mihosoft.vrl.v3d.CSG
+import eu.mihosoft.vrl.v3d.Cube
+import eu.mihosoft.vrl.v3d.Cylinder
+import eu.mihosoft.vrl.v3d.FileUtil
+
 import java.lang.reflect.Type;
+import java.nio.file.Paths
 
 float wheelRadius = 75 //outer radius of the drum
 float wheelHeight = 50 //height of the drum
@@ -72,7 +81,7 @@ wheel = wheel.difference(m5Cylinder) //hole for m5 bolt
 String STLfilename =partFileLocation + "wheel.stl"
 FileUtil.write(Paths.get(STLfilename),
 		wheel.toStlString());
-println "STL EXPORT to "+STL
+println "STL EXPORT to "+ STLfilename
 
 String myURL = "https://gist.github.com/aa464b39c1208c357b8d4ae7fe210bbb.git"
 String JSONfilename = partFileLocation + "params.json"
