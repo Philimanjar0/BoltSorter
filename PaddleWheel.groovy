@@ -7,8 +7,12 @@ int tollerance = 0 //to be assigned later
 int numberOfScoops = 8 //number of scoops in the wheel
 double toothDepth = 1/(Math.PI/gearPitch) + 2/(Math.PI/gearPitch) //sum of addendum and dedendum
 
+
 CSG m5Bearing = Vitamins.get("ballBearing", "695zz") //bearing vitamin
-CSG bearingCylinder = new Cylinder(m5Bearing.getMaxY() + tollerance, m5Bearing.getMaxY() + tollerance,5,(int)30).toCSG() //cyinder used for bearing slots, NO TOLLERANCE
+CSG bearingCylinder = new Cylinder(m5Bearing.getMaxY() + tollerance, m5Bearing.getMaxY()+tollerance,
+							m5Bearing.getMaxZ(),(int)30).toCSG() //cyinder used for bearing slots, NO TOLLERANCE
+
+CSG m5Cylinder = new Cylinder(2.5+tollerance,2.5+tollerance,20,(int)20).toCSG()//cylinder used for bolt holes
 
 CSG base = new Cylinder(wheelRadius-wallThickness,wheelRadius-wallThickness,5,(int)30).toCSG() //back plate of the  wheel
 
@@ -51,11 +55,11 @@ wheel = wheel.union(bevelGears.get(0)) //add the gear teeth to the outside of th
 CSG bearingSupport = new Cylinder(15,10,15,(int)30).toCSG() 
 wheel = wheel.union(bearingSupport)
 
-//hole for bearings to sit
-wheel = wheel.difference(bearingCylinder.movez(10))
+//hole for bear
+wheel = wheel.difference(bearingCylinder.movez(15-m5Bearing.getMaxZ()))
 wheel = wheel.difference(bearingCylinder)
 
 //TODO: us m5 vitamin
-wheel = wheel.difference(new Cylinder(2.5 + tollerance,2.5 + tollerance,20,(int)30).toCSG()) //hole for m5 bolt
+wheel = wheel.difference(m5Cylinder) //hole for m5 bolt
 
 return wheel
