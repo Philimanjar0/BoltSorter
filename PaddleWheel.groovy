@@ -11,6 +11,8 @@ int gearPitch = 6 //pitch of gear teeth, defined by arc length per gear tooth
 int tollerance = 0 //to be assigned later
 int numberOfScoops = 8 //number of scoops in the wheel
 double toothDepth = 1/(Math.PI/gearPitch) + 2/(Math.PI/gearPitch) //sum of addendum and dedendum
+int drivenGearTeeth = (int)(151+toothDepth)*Math.PI/gearPitch
+String partFileLocation = "/home/phil/Project_Parts/BoltSorter/Wheel/"
 
 CSG m5Bearing = Vitamins.get("ballBearing", "695zz") //bearing vitamin
 CSG bearingCylinder = new Cylinder(m5Bearing.getMaxY() + tollerance, m5Bearing.getMaxY()+tollerance,
@@ -25,7 +27,7 @@ def bevelGears = ScriptingEngine.gitScriptRun(
             "https://github.com/madhephaestus/GearGenerator.git", // git location of the library
             "bevelGear.groovy" , // file to load
             // Parameters passed to the funcetion
-            [(int)(151+toothDepth)*Math.PI/gearPitch,// Number of teeth gear a
+            [drivenGearTeeth,// Number of teeth gear a
 	        24,// Number of teeth gear b
 	        6,// thickness of gear A
 	        6,// gear pitch in arc length mm
@@ -67,33 +69,36 @@ wheel = wheel.difference(bearingCylinder)
 wheel = wheel.difference(m5Cylinder) //hole for m5 bolt
 
 //export STL to project file location
-String filename ="/home/phil/Project_Parts/BoltSorter/Wheel/wheel.stl"
-FileUtil.write(Paths.get(filename),
+String STLfilename =partFileLocation + "wheel.stl"
+FileUtil.write(Paths.get(STLfilename),
 		wheel.toStlString());
-println "STL EXPORT to "+filename
+println "STL EXPORT to "+STL
 
 String myURL = "https://gist.github.com/aa464b39c1208c357b8d4ae7fe210bbb.git"
-String file = "/home/phil/Project_Parts/BoltSorter/Wheel/params.json"
+String JSONfilename = partFileLocation + "params.json"
 
-HashMap<String, HashMap<String, Object>> database = new HashMap();
+HashMap<String, HashMap<String, Object>> attributes = new HashMap();
 											
 HashMap<String, Object> outerDimensions = new HashMap<>()
-outerDimensions.put("Max X",1)
-outerDimensions.put("Max Y",2)
-outerDimensions.put("Max Z",3)
-database.put("outer dimensions",outerDimensions)
+outerDimensions.put("Max X",wheel.getMaxX())
+outerDimensions.put("Max Y",wheel.getMaxY())
+outerDimensions.put("Max Z",wheel.getMaxZ())
+attributes.put("outer dimensions",outerDimensions)
 
-HashMap<String, Object> someOther = new HashMap<>()
-someOther.put("Data",1)
-someOther.put("Data2",2)
-database.put("other stuff",someOther)
+HashMap<String, Object> gearAttributes = new HashMap<>()
+gearAttributes.put("Driven Gear Teeth",drivenGearTeeth)
+gearAttributes.put("Drive Gear Teeth", 24)
+gearAttributes.put("Pitch", 6)
+gearAttributes.put("Center Distance", bevelGears.get(2))
+attributes.put("Gear Attributes",gearAttributes)
+
 
 Type TT_mapStringString = new TypeToken<HashMap<String, HashMap<String, Object>>>() {}.getType();
 Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
  
-String writeOut = gson.toJson(database, TT_mapStringString);
+String writeOut = gson.toJson(attributes, TT_mapStringString);
 println "New database JSON content = \n\n"+writeOut
 
-FileUtil.write(Paths.get(file),writeOut)
+FileUtil.write(Paths.get(JSONfilename),writeOut)
 
 return wheel
