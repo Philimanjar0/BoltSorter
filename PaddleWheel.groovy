@@ -1,3 +1,8 @@
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+
 float wheelRadius = 75 //outer radius of the drum
 float wheelHeight = 50 //height of the drum
 int releaseAngle = 10 //the z angle the scoops are turned, changes when bolts are dropped
@@ -6,7 +11,6 @@ int gearPitch = 6 //pitch of gear teeth, defined by arc length per gear tooth
 int tollerance = 0 //to be assigned later
 int numberOfScoops = 8 //number of scoops in the wheel
 double toothDepth = 1/(Math.PI/gearPitch) + 2/(Math.PI/gearPitch) //sum of addendum and dedendum
-
 
 CSG m5Bearing = Vitamins.get("ballBearing", "695zz") //bearing vitamin
 CSG bearingCylinder = new Cylinder(m5Bearing.getMaxY() + tollerance, m5Bearing.getMaxY()+tollerance,
@@ -21,7 +25,7 @@ def bevelGears = ScriptingEngine.gitScriptRun(
             "https://github.com/madhephaestus/GearGenerator.git", // git location of the library
             "bevelGear.groovy" , // file to load
             // Parameters passed to the funcetion
-            [(150+toothDepth)*Math.PI/gearPitch,// Number of teeth gear a
+            [(int)(151+toothDepth)*Math.PI/gearPitch,// Number of teeth gear a
 	        24,// Number of teeth gear b
 	        6,// thickness of gear A
 	        6,// gear pitch in arc length mm
@@ -61,5 +65,35 @@ wheel = wheel.difference(bearingCylinder)
 
 //TODO: us m5 vitamin
 wheel = wheel.difference(m5Cylinder) //hole for m5 bolt
+
+//export STL to project file location
+String filename ="/home/phil/Project_Parts/BoltSorter/Wheel/wheel.stl"
+FileUtil.write(Paths.get(filename),
+		wheel.toStlString());
+println "STL EXPORT to "+filename
+
+String myURL = "https://gist.github.com/aa464b39c1208c357b8d4ae7fe210bbb.git"
+String file = "/home/phil/Project_Parts/BoltSorter/Wheel/params.json"
+
+HashMap<String, HashMap<String, Object>> database = new HashMap();
+											
+HashMap<String, Object> outerDimensions = new HashMap<>()
+outerDimensions.put("Max X",1)
+outerDimensions.put("Max Y",2)
+outerDimensions.put("Max Z",3)
+database.put("outer dimensions",outerDimensions)
+
+HashMap<String, Object> someOther = new HashMap<>()
+someOther.put("Data",1)
+someOther.put("Data2",2)
+database.put("other stuff",someOther)
+
+Type TT_mapStringString = new TypeToken<HashMap<String, HashMap<String, Object>>>() {}.getType();
+Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+ 
+String writeOut = gson.toJson(database, TT_mapStringString);
+println "New database JSON content = \n\n"+writeOut
+
+FileUtil.write(Paths.get(file),writeOut)
 
 return wheel
